@@ -11,4 +11,4 @@ class Task(models.Model):
     finished_at = models.DateTimeField()
 
     def __str__(self):
-        return self.text
+        return self

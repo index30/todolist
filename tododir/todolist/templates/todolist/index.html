@@ -23,7 +23,7 @@
     {% if task_list %}
     <ul>
       {% for task in task_list %}
-      <li><a href="/todolist/{{task.id}}/">{{task.title}}</a></li>
+      <li><a href="/{{task.id}}/">{{task.title}}</a></li>
       {% endfor %}
     </ul>
     {% else %}

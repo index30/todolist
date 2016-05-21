@@ -18,9 +18,10 @@
   <body>
     {% if task_content %}
     <div class="jumbotron">
-      <h1>{task_content.title}</h1>
+      <h1>{{ task_content.title }}</h1>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    {{ task_content.text }}
 
     {% else %}
     <p>No tasks.</p>

@@ -9,12 +9,11 @@ def index(request):
     }
     return render(request, 'todolist/index.html', context)
 
-'''
-def task_content(request, task_id="1"):
+def task_content(request, task_id):
     task_num = int(task_id)
-    task_content = Task.objects.filter(id=task_id)
+    task_content = Task.objects.get(id=task_id)
     task_context = {
         'task_content':task_content
     }
-    return render(request, 'todolist/detail.html',context)
-'''
+    return render(request, 'todolist/detail.html',task_context)
+
