@@ -10,5 +10,5 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     finished_at = models.DateTimeField()
 
-    def __str__(self):
-        return self
+#    def __str__(self):
+#        return self

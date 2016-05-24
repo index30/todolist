@@ -17,3 +17,5 @@ def task_content(request, task_id):
     }
     return render(request, 'todolist/detail.html',task_context)
 
+def make_task(request):
+    return render(request, 'todolist/make.html')
