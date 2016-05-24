@@ -5003,13 +5003,17 @@ a.badge:focus {
 .nav-pills > li > a > .badge {
   margin-left: 3px;
 }
+
 .jumbotron {
-  padding-top: 30px;
-  padding-bottom: 30px;
-  margin-bottom: 30px;
-  color: inherit;
-  background-color: #eee;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+    color: inherit;
+    background-image: url("../img/photo.jpg");
+    background-size: cover;
+    background-position: center 40%;
 }
+
 .jumbotron h1,
 .jumbotron .h1 {
   color: inherit;
