@@ -12,7 +12,7 @@
 {% if task_list %}
 <ul class="list-group">
   {% for task in task_list %}
-  <li class="list-group-item"><a href="{% url 'detail' task.id%}">{{task.title}}</a></li>
+  <li class="list-group-item"><a href="">{{task.title}}</a></li>
   {% endfor %}
 </ul>
 
