@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}To do list{% endblock %}
+
+{% block jumbo_title %}Make User{% endblock %}
+
+{% block content %}
+<form action="{% url 'make_user' %}" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-default" value="Regist">
+    <a href="{% url 'top' %}">
+      登録
+    </a>
+</botton>
+</form>
+{% endblock %}
