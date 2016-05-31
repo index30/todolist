@@ -130,8 +130,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
-LOGIN_URL='/todolist/login/'
+#LOGIN_URL='/users;login/'
 
-LOGIN_REDIRECT_URL='/todolist/login'
+#LOGIN_REDIRECT_URL='/users;login/'
 
 #AUTH_USER_MODEL = 'todolist.CustomUser'

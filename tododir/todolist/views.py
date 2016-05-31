@@ -3,6 +3,7 @@ from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
 
 from .models import Task
+from .models import User
 
 import datetime
 
@@ -32,7 +33,6 @@ def task_content(request, task_id):
 @login_required
 def make_task(request):
     try:
-        id=4
         m_title = request.POST['title']
         m_text = request.POST['text']
         m_done = False
@@ -54,9 +54,21 @@ def delete_task(request,task_id):
     d_task.delete()
     return redirect('index')
 
-@require_GET
-def make_user(request):
-    form = UserCreationForm()
-    c = {'form': form}
-    c.update(csrf(request))
-    return render_to_response('todolist/make_user.html', c)
+#@require_GET
+#def to_register(request):
+#    form = UserCreationForm()
+#    c = {'form': form}
+#    c.update(csrf(request))
+#    print('toregi')
+#    return render_to_response('todolist/make_user.html', c)
+
+def register(request):
+    try:
+        u_name=request.POST['user_name']
+        u_email=request.POST['email']
+        u_pass=request.POST['password']
+    except (KeyError,Task.DoesNotExist):
+        return render(request,'todolist/make_user.html')
+    else:
+        User(name=u_name,email=u_email,password=u_pass).save()
+    return redirect('top')
