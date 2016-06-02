@@ -1,9 +1,11 @@
 from django.shortcuts import render,redirect,get_object_or_404,render_to_response
 from django.core.context_processors import csrf
+from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 
 from .models import Task
-from .models import User
+#from .models import User
+from django.contrib.auth.models import User
 
 import datetime
 
@@ -67,8 +69,33 @@ def register(request):
         u_name=request.POST['user_name']
         u_email=request.POST['email']
         u_pass=request.POST['password']
-    except (KeyError,Task.DoesNotExist):
+    except (KeyError,User.DoesNotExist):
         return render(request,'todolist/make_user.html')
     else:
-        User(name=u_name,email=u_email,password=u_pass).save()
+        User.objects.create_user(u_name,u_email,u_pass).save()
+    return redirect('top')
+
+#
+#def signup(request):
+#    try:
+#        u_name=request.POST['user_name']
+#        u_pass=request.POST['password']
+#        user = authenticate(username=u_name, password=u_pass)
+#    except (KeyError,User.DoesNotExist):
+#        return render(request,'todolist/signup.html')
+#    else:
+#        if user is not None:
+#            if user.is_active:
+#                login(request, user)
+#                return redirect('top')
+#            else:
+#                form_errors = True
+#            return render(request,'todolist/signup.html')
+#        else:
+#            form_invalid=True
+#        return render(request,'todolist/signup.html')
+
+
+def signout(request):
+    logout(request)
     return redirect('top')
