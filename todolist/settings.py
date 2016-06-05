@@ -53,7 +53,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'tododir.urls'
+ROOT_URLCONF = 'todolist.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tododir.wsgi.application'
+WSGI_APPLICATION = 'todolist.wsgi.application'
 
 
 # Database
