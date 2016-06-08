@@ -33,9 +33,11 @@
       {{ task_content.finished_at}}<br>
       
       <button type="button" class="btn btn-default"><a href="{% url 'index' %}">前へ戻る</a></button>
+
       <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">
 	削除
       </button>
+      
 
       <!-- Modal -->
       <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -48,17 +50,43 @@
 	    <div class="modal-body">
 	      本当に削除してよろしいですか？
 	    </div>
+	    
 	    <div class="modal-footer">
+	      
 	      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	      <button type="button" class="btn btn-default"><a href="{% url 'delete' task_content.id %}">Delete</a></button>
+	      <button type="submit" class="btn btn-default">
+		<a class="user-delete-link" href=# data-delete-url="{% url 'task' task_content.id %}">
+		  Delete
+		</a>
+	      </button>
+	      
 	    </div>
+	    
 	  </div>
 	</div>
       </div>
-      
       {% else %}
       <p>No tasks.</p>
       {% endif %}
     </div>
+    <script>
+      $(function() {
+      $(".user-delete-link").on("click", function() {
+      var delete_url = $(this).attr('data-delete-url');
+      $.ajax({
+      url: delete_url,
+      type: 'DELETE',
+      success: function(response) {
+      if (response.status === 'OK') {
+      window.location = '{% url 'index' %}';
+      } else {
+      alert('Delete failed.')
+      }
+      }
+      });
+      return false;
+      });
+      });
+    </script>
   </body>
 </html>

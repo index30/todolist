@@ -31,7 +31,7 @@
 	<div class="navbar-collapse collapse">
 	  <ul class="nav navbar-nav">
 	    <li class="{% block nav_index %}{% endblock %}"><a href="{% url 'index' %}">タスク一覧</a></li>
-	    <li class="{% block nav_make %}{% endblock %}"><a href="{% url 'make' %}">タスク作成</a></li>
+	    <li class="{% block nav_make %}{% endblock %}"><a href="{% url 'create' %}">タスク作成</a></li>
 	    <li class=""><a href="{% url 'register' %}">ユーザー登録</a></li>
 	    {% if not user.is_authenticated %}
 	    <li class="{% block nav_signin %}{% endblock %}"><a href="{% url 'signin' %}">ログイン</a></li>

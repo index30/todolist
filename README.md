@@ -12,5 +12,7 @@ To do list for me.
 ##How to run
 
 ```
-python manage.py runserver
+$ git clone git@github.com:index30/todolist.git
+$ pip install -r requirements.txt
+$ python manage.py runserver
 ```

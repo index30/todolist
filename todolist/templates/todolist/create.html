@@ -8,7 +8,7 @@
 {% block nav_make %}active{% endblock %}
 
 {% block content %}
-<form class="form-horizontal" role="form" action="{% url 'make' %}" method = "post">
+<form class="form-horizontal" role="form" action="{% url 'create' %}" method = "post">
   {% csrf_token %}
   <div class="form-group">
     <label class="col-sm-2 control-label">Title</label>
