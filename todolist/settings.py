@@ -28,8 +28,8 @@ SECRET_KEY = 'f^79x=l!sjvcus%9j)*nfrwb)p=8rj8(ax_x%+ilgyj*#9lp+d'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG=True
-'''
+#DEBUG=True
+
 if 'local' in HOST_NAME:
     DEBUG = True
     #TEMPLATE_DEBUG = True
@@ -37,7 +37,7 @@ else:
     DEBUG = False
     #TEMPLATE_DEBUG = False
     ALLOWED_HOSTS = ['*']
-'''
+
 
 # Application definition
 
