@@ -104,8 +104,6 @@ ENV/
 
 .DS_Store
 
-*.jpg
-*.png
 
 bin
 include

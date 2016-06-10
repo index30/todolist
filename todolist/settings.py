@@ -28,6 +28,8 @@ SECRET_KEY = 'f^79x=l!sjvcus%9j)*nfrwb)p=8rj8(ax_x%+ilgyj*#9lp+d'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG=True
+'''
 if 'local' in HOST_NAME:
     DEBUG = True
     #TEMPLATE_DEBUG = True
@@ -35,7 +37,7 @@ else:
     DEBUG = False
     #TEMPLATE_DEBUG = False
     ALLOWED_HOSTS = ['*']
-
+'''
 
 # Application definition
 
@@ -62,6 +64,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'todolist.urls'
@@ -150,14 +153,29 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 
+#STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
-
 STATIC_URL = '/static/'
-
+#新しく追加
+SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 # 静的ファイルを共通で置く
 STATICFILES_DIRS = (
-    os.path.join(STATIC_ROOT, "static"),
+        os.path.join(PROJECT_ROOT, 'static'),
 )
 
+STATICFILES_FINDERS = (
+    #'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',    #causes verbose duplicate notifications in django 1.9
+)
+
+#from django.core.wsgi import get_wsgi_application
+#from whitenoise.django import DjangoWhiteNoise
+
+#application = get_wsgi_application()
+#application = DjangoWhiteNoise(application)
+
+#Clingを使う場合はコメントアウト
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
+
 
