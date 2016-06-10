@@ -1,4 +1,13 @@
+dateutils==0.6.6
+dj-database-url==0.4.1
 Django==1.9.6
 django-bootstrap-form==3.2.1
+django-debug-toolbar==1.4
 django-widget-tweaks==1.4.1
+gunicorn==19.6.0
+python-dateutil==2.5.3
+pytz==2016.4
+six==1.10.0
+sqlparse==0.1.19
 wheel==0.26.0
+whitenoise==3.2

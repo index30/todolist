@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import socket
+HOST_NAME = socket.gethostname()
+URL_ROOT = HOST_NAME
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,10 +25,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'f^79x=l!sjvcus%9j)*nfrwb)p=8rj8(ax_x%+ilgyj*#9lp+d'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: don't run with debug turned on in production!
+if 'local' in HOST_NAME:
+    DEBUG = True
+    #TEMPLATE_DEBUG = True
+else:
+    DEBUG = False
+    #TEMPLATE_DEBUG = False
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrapform',
     'widget_tweaks',
+    'debug_toolbar',
+    'gunicorn',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -77,13 +88,19 @@ WSGI_APPLICATION = 'todolist.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if 'local' in HOST_NAME:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
-
+else:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config()
+    }
+    
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -121,17 +138,26 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.9/howto/static-files/
-
-STATIC_URL = '/static/'
-# 静的ファイルを共通で置く
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
-
 LOGIN_URL='/login/'
 
 LOGIN_REDIRECT_URL='/'
 
 #AUTH_USER_MODEL = 'todolist.CustomUser'
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.9/howto/static-files/
+
+
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+
+STATIC_URL = '/static/'
+
+# 静的ファイルを共通で置く
+STATICFILES_DIRS = (
+    os.path.join(STATIC_ROOT, "static"),
+)
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
