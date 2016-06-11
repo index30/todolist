@@ -1,5 +1,6 @@
 import json
 import sys
+import re
 from django.shortcuts import render,redirect,get_object_or_404,render_to_response
 #from django.core.context_processors import csrf
 from django.template.context_processors import csrf
@@ -60,18 +61,22 @@ def create(request):
         #strをdatetimeに変換出来ない
         tdatatime = request.POST['finish']
         m_user = request.user
-
-        m_finished_at = datetime.datetime.strptime(tdatatime, '%Y-%m-%dT%H:%M')
     except (KeyError,Task.DoesNotExist):
         return render_to_response('todolist/create.html',RequestContext(request,{}))
     else:
-        if m_created_at < m_finished_at and m_finished_at < (m_created_at + relativedelta(years=80)):
-            Task(title=m_title,text=m_text,done=m_done,created_at=m_created_at,updated_at=m_updated_at,finished_at=m_finished_at,user=m_user).save()
-            return redirect('index')
+        pattern = "(20)[0-9]{2}\-[0-9]{1,2}\-[0-9]{1,2}[T](0[0-9]|1[0-9]|2[0-3]):[0-5][0]"
+        matchOB = re.match(pattern,tdatatime)
+        if matchOB:
+            m_finished_at = datetime.datetime.strptime(tdatatime, '%Y-%m-%dT%H:%M')
+            if m_title and m_text and m_created_at < m_finished_at and m_finished_at < (m_created_at + relativedelta(years=80)):
+                Task(title=m_title,text=m_text,done=m_done,created_at=m_created_at,updated_at=m_updated_at,finished_at=m_finished_at,user=m_user).save()
+                return redirect('index')
+            else:
+                error_mes = True
+                return render_to_response('todolist/create.html',RequestContext(request,error_mes))
         else:
             error_mes = True
             return render_to_response('todolist/create.html',RequestContext(request,error_mes))
-    
 def register(request):
     #login中はloginに飛ぶ
     if not request.user.is_authenticated():
@@ -79,11 +84,16 @@ def register(request):
             u_name=request.POST['user_name']
             u_email=request.POST['email']
             u_pass=request.POST['password']
+            c_pass=request.POST['confirm']
         except (KeyError,User.DoesNotExist):
             return render_to_response('todolist/make_user.html',RequestContext(request,{}))
         else:
-            User.objects.create_user(u_name,u_email,u_pass).save()
-            return redirect('signin')
+            if u_pass == c_pass:
+                User.objects.create_user(u_name,u_email,u_pass).save()
+                return redirect('signin')
+            else:
+                error_mes = True
+                return render_to_response('todolist/make_user.html',RequestContext(request,error_mes))
     else:
         return redirect('signin')
 

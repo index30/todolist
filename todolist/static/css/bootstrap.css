@@ -144,6 +144,9 @@ input {
   line-height: normal;
 }
 input[type="checkbox"],
+select{
+    vertical-align:middle;
+}
 input[type="radio"] {
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -2538,8 +2541,8 @@ input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
   outline: thin dotted;
-  outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
+  outline: 0px auto -webkit-focus-ring-color;
+  outline-offset: 0px;
 }
 output {
   display: block;

@@ -12,9 +12,38 @@
 {% if task_list %}
 <ul class="list-group">
   {% for task in task_list %}
-    <li class="list-group-item"><a href="{% url 'task' task.id%}">{{task.title}}</a></li>
+  <li class="list-group-item">
+    <div class="position">
+      <label>
+	<input type="checkbox" class="user-delete-link" name="chkbox" data-delete-url="{% url 'task' task.id %}"/>
+	<a href="{% url 'task' task.id%}">
+	  {{task.title}}
+	</a>
+      </label>
+    </div>
+    Abstract {{task.text}}
+  </li>
   {% endfor %}
 </ul>
+<script>
+ $(function() {
+   $(".user-delete-link").on("click", function() {
+     var delete_url = $(this).attr('data-delete-url');
+     $.ajax({
+       url: delete_url,
+       type: 'DELETE',
+       success: function(response) {
+	 if (response.status === 'OK') {
+	   window.location = '{% url 'index' %}';
+	 } else {
+	   alert('Delete failed.')
+	 }
+       }
+     });
+     return false;
+   });
+ });
+</script>
 
 {% else %}
 <p>No tasks.</p>
