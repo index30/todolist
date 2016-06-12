@@ -20,6 +20,13 @@ from django.views.decorators.http import require_GET
 from django.views.generic import View
 
 def top(request):
+#    if request.user.is_authenticated:
+#        task_list = Task.objects.filter(user=request.user)
+#        context = {
+#            'task_list':task_list
+#        }
+#    else:
+#        context=''
     return render_to_response('todolist/top.html',RequestContext(request,{}))
 
 @login_required
@@ -28,7 +35,6 @@ def index(request):
     context = {
         'task_list':task_list
     }
-    print(request)
     return render_to_response('todolist/index.html',RequestContext(request,context))
 
 @login_required
@@ -64,7 +70,7 @@ def create(request):
     except (KeyError,Task.DoesNotExist):
         return render_to_response('todolist/create.html',RequestContext(request,{}))
     else:
-        pattern = "(20)[0-9]{2}\-[0-9]{1,2}\-[0-9]{1,2}[T](0[0-9]|1[0-9]|2[0-3]):[0-5][0]"
+        pattern = "(20)[0-9]{2}\-[0-9]{1,2}\-[0-9]{1,2}[T](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]"
         matchOB = re.match(pattern,tdatatime)
         if matchOB:
             m_finished_at = datetime.datetime.strptime(tdatatime, '%Y-%m-%dT%H:%M')

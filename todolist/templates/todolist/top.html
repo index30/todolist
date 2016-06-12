@@ -9,5 +9,13 @@
 
 
 {% block content %}
-This is top site.
+
+<h2>This is top site.</h2></br>
+{% if task_list %}
+You have tasks.
+{% else %}
+
+<h2>There is no task for immediate.</h2>
+{% endif %}
+
 {% endblock %}
