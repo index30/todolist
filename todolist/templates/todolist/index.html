@@ -12,26 +12,92 @@
 {% if task_list %}
 <ul class="list-group">
   {% for task in task_list %}
-  <li class="list-group-item">
-    <div class="position">
-      <label>
-	<input type="checkbox" class="user-delete-link" name="chkbox" data-delete-url="{% url 'task' task.id %}"/>
-	<a href="{% url 'task' task.id%}">
-	  {{task.title}}
-	</a>
-      </label>
-    </div>
+  
+  <input type="checkbox" class="del-id" value={{task.id}} />
+  
+  {% if task.done %}  
+  <li class="list-group-item disabled" disable-id="{{task.id}}">
+    {% else %}
+    <li class="list-group-item" disable-id="{{task.id}}">
+      {% endif %}
+      <div class="position">
+	<label>
+	  <a href="{% url 'task' task.id%}">
+	    {{task.title}}
+	  </a>
+	</label>
+    </div>  
+    
     Abstract {{task.text}}
-  </li>
-  {% endfor %}
+    </li>
+    
+    
+    {% endfor %}
 </ul>
+<button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">
+  選択したタスクを削除
+</button>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+	  <div class="modal-content">
+	    <div class="modal-header">
+	      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	      <h4 class="modal-title" id="myModalLabel">Caution</h4>
+	    </div>
+	    <div class="modal-body">
+	      チェックを入れたタスクを本当に削除してよろしいですか？
+	    </div>
+	    
+	    <div class="modal-footer">
+	      
+	      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	      <button type="submit" class="btn btn-default">
+		<a class="user-delete-link" href=# data-delete-url="/task/">
+		  Delete
+		</a>
+	      </button>
+	      
+	    </div>
+	    
+	  </div>
+	</div>
+</div>
 <script>
+// $(function() {
+//   $(".del-id").on("click", function() {
+//     var chk_url = $(this).attr('chk-url');
+ //     $.ajax({
+//	url: chk_url,
+//	type: 'GET',
+//	success: function(response) {
+///	  if (response.status === 'OK') {
+//	    window.location = '{% url 'index' %}';
+//	  } else {
+//	    alert('Check failed.')
+//	  }
+//	}
+  //    });
+    // return false;
+//   })
+// });
+ 
+ 
+//console.log(area);
  $(function() {
    $(".user-delete-link").on("click", function() {
+     area = $('.del-id:checked').map(function(){
+       return $(this).val();
+     }).get();
      var delete_url = $(this).attr('data-delete-url');
+     area.map(function (t_id){
+       delete_url = delete_url + t_id + ',';
+     });
+     
      $.ajax({
        url: delete_url,
        type: 'DELETE',
+       //data: area,
        success: function(response) {
 	 if (response.status === 'OK') {
 	   window.location = '{% url 'index' %}';
@@ -44,7 +110,6 @@
    });
  });
 </script>
-
 {% else %}
 <p>No tasks.</p>
 {% endif %}

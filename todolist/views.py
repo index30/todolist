@@ -1,22 +1,17 @@
 import json
 import sys
 import re
+import datetime
+from .models import Task
+from dateutil.relativedelta import relativedelta
+from django.http import HttpResponse, Http404, QueryDict
 from django.shortcuts import render,redirect,get_object_or_404,render_to_response
-#from django.core.context_processors import csrf
 from django.template.context_processors import csrf
 from django.template import RequestContext
 from django.contrib.auth import authenticate,login,logout,models
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, Http404
-
-from .models import Task
 from django.contrib.auth.models import User
-
-import datetime
-from dateutil.relativedelta import relativedelta
-
 from django.views.decorators.http import require_GET
-
 from django.views.generic import View
 
 def top(request):
@@ -57,6 +52,45 @@ def task_content(request, task_id):
             return HttpResponse(json.dumps({"status": "404"}), content_type='application/json')
 
 @login_required
+def task_done(request,task_id):
+    try:
+        task_num = int(task_id)
+        #task_num = request.POST['chkbox']
+        task_content = Task.objects.get(id=task_num)
+        print(task_content)
+        if(task_content.done == False):
+            task_content.done = True
+        else:
+            task_content.done = False
+        task_content.save()
+        task_list = Task.objects.filter(user=request.user)
+        context = {
+            'task_list':task_list
+        }
+        return render_to_response('todolist/index.html',RequestContext(request,context))
+    except(KeyError,Task.DoesNotExist):
+        return redirect('top')
+    
+@login_required
+def select_delete(request,tasks_id):
+    try:
+        #print("success")
+        data = tasks_id
+        #print(data)
+        task_list = data[:-1].split(",")
+        #data = QueryDict(request.body)
+        #de_list = data.getlist('area')
+    except(KeyError):
+        print("error")
+        return redirect('index')
+    else:
+        for tip in task_list:
+           #存在しないものを消さないようにする処理を実装
+            d_task = Task.objects.get(id=int(tip))
+            d_task.delete()
+        return HttpResponse(json.dumps({"status": "OK"}), content_type='application/json')
+    
+@login_required
 def create(request):
     try:
         m_title = request.POST['title']
@@ -83,6 +117,7 @@ def create(request):
         else:
             error_mes = True
             return render_to_response('todolist/create.html',RequestContext(request,error_mes))
+        
 def register(request):
     #login中はloginに飛ぶ
     if not request.user.is_authenticated():
