@@ -15,13 +15,15 @@ from django.views.decorators.http import require_GET
 from django.views.generic import View
 
 def top(request):
-#    if request.user.is_authenticated:
-#        task_list = Task.objects.filter(user=request.user)
-#        context = {
-#            'task_list':task_list
-#        }
-#    else:
-#        context=''
+    '''
+    if request.user.is_authenticated:
+        task_list = Task.objects.filter(user=request.user)
+        context = {
+            'task_list':task_list
+        }
+    else:
+        context=''
+'''
     return render_to_response('todolist/top.html',RequestContext(request,{}))
 
 @login_required
@@ -35,78 +37,75 @@ def index(request):
 @login_required
 def task_content(request, task_id):
     if request.method == "GET":
-        task_num = int(task_id)
         task_content = Task.objects.get(id=task_id)
-        task_context = {
+        task_info = {
             'task_content':task_content
         }
-        return render_to_response('todolist/task.html',RequestContext(request,task_context))
+        return render_to_response('todolist/task.html',RequestContext(request,task_info))
     elif request.method == "DELETE":
         # d_task = get_object_or_404(Task,pk=task_id)
         try:
-            d_task = Task.objects.get(id=task_id)
+            del_task = Task.objects.get(id=task_id)
             # 削除する
-            d_task.delete()
+            del_task.delete()
             return HttpResponse(json.dumps({"status": "OK"}), content_type='application/json')
         except Task.DoesNotExist:
             return HttpResponse(json.dumps({"status": "404"}), content_type='application/json')
 
 @login_required
-def task_done(request,task_id):
-    try:
-        task_num = int(task_id)
-        #task_num = request.POST['chkbox']
-        task_content = Task.objects.get(id=task_num)
-        print(task_content)
-        if(task_content.done == False):
-            task_content.done = True
-        else:
-            task_content.done = False
-        task_content.save()
-        task_list = Task.objects.filter(user=request.user)
-        context = {
-            'task_list':task_list
-        }
-        return render_to_response('todolist/index.html',RequestContext(request,context))
-    except(KeyError,Task.DoesNotExist):
-        return redirect('top')
-    
-@login_required
-def select_delete(request,tasks_id):
+def select_chk_or_del(request,tasks_id):
     if request.method == "DELETE":
         try:
-            data = tasks_id
-            task_list = list(map(int,data[:-1].split(",")))
+            task_list = list(map(int,tasks_id[:-1].split(",")))
         except(KeyError):
             return redirect('index')
         else:
-            #Task.objects.filter(id=task_list).delete()
-            for tip in task_list:
-                Task.objects.get(id=tip).delete()
+            [Task.objects.get(id=t).delete() for t in task_list]
+            #for tip in task_list:
+            #    Task.objects.get(id=tip).delete()
             return HttpResponse(json.dumps({"status": "OK"}), content_type='application/json')
-    else:
-        return redirect('index')
+    elif request.method == "GET":
+        print("test")
+        try:
+            task_id = list(map(int,tasks_id[:-1].split(",")))
+            emp = []
+            for task_num in task_id:
+                task_content = Task.objects.get(id=task_num)
+                emp.append(task_content)
+        except(KeyError,Task.DoesNotExist):
+            return redirect('top')
+        else:
+            for tip in emp:
+                if tip.done == False:
+                    tip.done = True
+                else:
+                    tip.done = False
+                tip.save()
+            task_list = Task.objects.filter(user=request.user)
+            context = {
+                'task_list':task_list
+            }
+            return HttpResponse(json.dumps({"status": "OK"}), content_type='application/json')
     
 @login_required
 def create(request):
     try:
-        m_title = request.POST['title']
-        m_text = request.POST['text']
-        m_done = False
-        m_created_at = datetime.datetime.now()
-        m_updated_at = datetime.datetime.now()
-        #strをdatetimeに変換出来ない
+        new_title = request.POST['title']
+        new_text = request.POST['text']
+        new_done = False
+        new_created_at = datetime.datetime.now()
+        new_updated_at = datetime.datetime.now()
         tdatatime = request.POST['finish']
-        m_user = request.user
+        new_user = request.user
     except (KeyError,Task.DoesNotExist):
         return render_to_response('todolist/create.html',RequestContext(request,{}))
     else:
         pattern = "(20)[0-9]{2}\-[0-9]{1,2}\-[0-9]{1,2}[T](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]"
         matchOB = re.match(pattern,tdatatime)
         if matchOB:
-            m_finished_at = datetime.datetime.strptime(tdatatime, '%Y-%m-%dT%H:%M')
-            if m_title and m_text and m_created_at < m_finished_at and m_finished_at < (m_created_at + relativedelta(years=80)):
-                Task(title=m_title,text=m_text,done=m_done,created_at=m_created_at,updated_at=m_updated_at,finished_at=m_finished_at,user=m_user).save()
+            new_finished_at = datetime.datetime.strptime(tdatatime, '%Y-%m-%dT%H:%M')
+            if new_title and new_text and new_created_at < new_finished_at and new_finished_at < (new_created_at + relativedelta(years=80)):
+                Task(title=new_title,text=new_text,done=new_done,created_at=new_created_at,updated_at=new_updated_at,finished_at=new_finished_at,user=new_user).save()
                 return redirect('index')
             else:
                 error_mes = True
@@ -116,18 +115,17 @@ def create(request):
             return render_to_response('todolist/create.html',RequestContext(request,error_mes))
         
 def register(request):
-    #login中はloginに飛ぶ
     if not request.user.is_authenticated():
         try:
-            u_name=request.POST['user_name']
-            u_email=request.POST['email']
-            u_pass=request.POST['password']
-            c_pass=request.POST['confirm']
+            new_name=request.POST['user_name']
+            new_email=request.POST['email']
+            new_pass=request.POST['password']
+            conf_pass=request.POST['confirm']
         except (KeyError,User.DoesNotExist):
             return render_to_response('todolist/make_user.html',RequestContext(request,{}))
         else:
-            if u_pass == c_pass:
-                User.objects.create_user(u_name,u_email,u_pass).save()
+            if new_pass == conf_pass:
+                User.objects.create_user(new_name,new_email,new_pass).save()
                 return redirect('signin')
             else:
                 error_mes = True

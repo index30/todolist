@@ -8,7 +8,8 @@
 
 {% block content %}
 {% if error_mes == True%}
-入力に誤りがありました。もう一度登録し直して下さい。
+入力に誤りがありました。もう一度登録し直して下さい。 <br>
+※既にそのユーザー名は登録されている可能性があります。別の名前でお試し下さい。
 {% endif %}
 <form class="form-horizontal" role="form" action="{% url 'register' %}" method = "post">
   {% csrf_token %}

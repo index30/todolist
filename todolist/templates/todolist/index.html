@@ -13,11 +13,13 @@
 <ul class="list-group">
   {% for task in task_list %}
   
-  <input type="checkbox" class="del-id" value={{task.id}} />
   
-  {% if task.done %}  
+  
+  {% if task.done %}
+  <input type="checkbox" class="del-id" chk-url="/task/" value={{task.id}}/>
   <li class="list-group-item disabled" disable-id="{{task.id}}">
     {% else %}
+    <input type="checkbox" class="del-id" chk-url="/task/" value={{task.id}}/>
     <li class="list-group-item" disable-id="{{task.id}}">
       {% endif %}
       <div class="position">
@@ -26,9 +28,9 @@
 	    {{task.title}}
 	  </a>
 	</label>
-    </div>  
-    
-    Abstract {{task.text}}
+      </div>  
+      
+      Abstract {{task.text}}
     </li>
     
     
@@ -36,6 +38,12 @@
 </ul>
 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">
   選択したタスクを削除
+</button>
+
+<button type="button" class="btn btn-default" data-toggle="modal">
+  <a class="user-check-link" href=# data-check-url="/task/">
+    チェックを入れたタスクの完了/未完了
+  </a>
 </button>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -64,26 +72,32 @@
 	</div>
 </div>
 <script>
-// $(function() {
-//   $(".del-id").on("click", function() {
-//     var chk_url = $(this).attr('chk-url');
- //     $.ajax({
-//	url: chk_url,
-//	type: 'GET',
-//	success: function(response) {
-///	  if (response.status === 'OK') {
-//	    window.location = '{% url 'index' %}';
-//	  } else {
-//	    alert('Check failed.')
-//	  }
-//	}
-  //    });
-    // return false;
-//   })
-// });
  
+$(function() {
+   $(".user-check-link").on("click", function() {
+     area = $('.del-id:checked').map(function(){
+       return $(this).val();
+     }).get();
+     var check_url = $(this).attr('data-check-url');
+     area.map(function (t_id){
+       check_url = check_url + t_id.slice(0,2) + ',';
+     });
+     
+     $.ajax({
+       url: check_url,
+       type: 'GET',
+       success: function(response) {
+	 if (response.status === 'OK') {
+	   window.location = '{% url 'index' %}';
+	 } else {
+	   alert('Check failed.')
+	 }
+       }
+     });
+     return false;
+   });
+ });
  
-//console.log(area);
  $(function() {
    $(".user-delete-link").on("click", function() {
      area = $('.del-id:checked').map(function(){
@@ -91,13 +105,12 @@
      }).get();
      var delete_url = $(this).attr('data-delete-url');
      area.map(function (t_id){
-       delete_url = delete_url + t_id + ',';
+       delete_url = delete_url + t_id.slice(0,2) + ',';
      });
      
      $.ajax({
        url: delete_url,
        type: 'DELETE',
-       //data: area,
        success: function(response) {
 	 if (response.status === 'OK') {
 	   window.location = '{% url 'index' %}';
