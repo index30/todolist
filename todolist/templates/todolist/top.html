@@ -6,16 +6,18 @@
 {% block jumbo_title %}Top Page{% endblock %}
 
 
-
-
 {% block content %}
 
-<h2>This is top site.</h2></br>
 {% if task_list %}
-You have tasks.
+  <h3 class="text-center">現在 <span class="text-danger">{{number}}</span> 個のタスクが残っています</h3>
 {% else %}
-
-<h2>There is no task for immediate.</h2>
+{% if error_mes %}
+<div class="alert alert-danger" role="alert">
+  <h3>{{error_mes}}</h3><br>
+</div>
+{% else %}
+<h3 class="text-center">残っているタスクはありません</h3>
+{% endif %}
 {% endif %}
 
 {% endblock %}

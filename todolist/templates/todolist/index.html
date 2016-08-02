@@ -30,13 +30,13 @@
 	</label>
       </div>  
       
-      Abstract {{task.text}}
+      Deadline: {{task.finished_at}}
     </li>
     
     
     {% endfor %}
 </ul>
-<button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">
+<button type="button" class="btn btn-warning" data-toggle="modal" data-target="#myModal">
   選択したタスクを削除
 </button>
 
@@ -124,7 +124,8 @@ $(function() {
  });
 </script>
 {% else %}
-<p>No tasks.</p>
+<h3 class="text-center">残っているタスクはありません</h3>
+
 {% endif %}
 {% endblock %}
 
