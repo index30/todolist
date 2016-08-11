@@ -68,7 +68,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'todolist.middleware.AutoLogout', 
 ]
+
+# Auto logout delay in minutes
+AUTO_LOGOUT_DELAY = 5 #equivalent to 5 minutes
 
 ROOT_URLCONF = 'todolist.urls'
 
@@ -180,5 +184,6 @@ STATICFILES_FINDERS = (
 #Clingを使う場合はコメントアウト
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 
