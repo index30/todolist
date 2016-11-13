@@ -3,8 +3,10 @@ import sys
 import re
 import datetime
 import requests
+from collections import OrderedDict
 from django.db import IntegrityError
 from .models import Task
+from .common import Common
 from django.conf import settings
 from dateutil.relativedelta import relativedelta
 from django.http import HttpResponse, Http404, QueryDict
@@ -46,31 +48,14 @@ def index(request):
 @login_required
 def task_content(request, task_id):
     if request.method == "GET":
-        try:
-            task_content = Task.objects.get(id=task_id)
-        except(KeyError, Task.DoesNotExist):
-            return redirect('top')
+        task_info = Common.get_task(request,task_id)
+        if len(task_info) > 0:
+            return render_to_response('todolist/task.html',
+                                      RequestContext(request, task_info))
         else:
-            if task_content.user.username == request.user.username:
-                task_info = {
-                    'task_content': task_content
-                }
-                return render_to_response('todolist/task.html',
-                                          RequestContext(request, task_info))
-            else:
-                return redirect('top')
+            return redirect('top')
     elif request.method == "DELETE":
-        # d_task = get_object_or_404(Task,pk=task_id)
-        try:
-            del_task = Task.objects.get(id=task_id)
-            # 削除する
-            if del_task.user.username == request.user.username:
-                del_task.delete()
-            return HttpResponse(json.dumps({"status": "OK"}),
-                                content_type='application/json')
-        except Task.DoesNotExist:
-            return HttpResponse(json.dumps({"status": "404"}),
-                                content_type='application/json')
+        Common.delete_task(request,task_id)
 
 
 @login_required
@@ -289,3 +274,17 @@ def register(request):
 def signout(request):
     logout(request)
     return redirect('top')
+
+def render_json_response(request, data, status=None):
+    """response を JSON で返却"""
+    json_str = json.dumps(data, ensure_ascii=False, indent=2)
+    callback = request.GET.get('callback')
+    if not callback:
+        callback = request.POST.get('callback')  # POSTでJSONPの場合
+        if callback:
+            json_str = "%s(%s)" % (callback, json_str)
+            response = HttpResponse(json_str, content_type='application/javascript; charset=UTF-8', status=status)
+        else:
+            response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
+        return response
+        

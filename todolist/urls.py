@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from . import api
 from .views import *
 from django.conf import settings
 import django.contrib.auth.views
@@ -17,4 +18,5 @@ urlpatterns = [
         'document_root': settings.STATIC_ROOT,
     }
     ),
+    url(r'^api/task/(?P<task_id>\d+)/$', api.api_content, name='api_content')
 ]
