@@ -105,7 +105,7 @@ $(function() {
      }).get();
      var delete_url = $(this).attr('data-delete-url');
      area.map(function (t_id){
-       delete_url = delete_url + t_id.slice(0,2) + ',';
+       delete_url = delete_url + t_id.slice(0,-1) + ',';
      });
      
      $.ajax({

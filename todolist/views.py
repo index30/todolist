@@ -55,8 +55,12 @@ def task_content(request, task_id):
         else:
             return redirect('top')
     elif request.method == "DELETE":
-        Common.delete_task(request,task_id)
-
+        if Common.delete_task(request,task_id):
+            return HttpResponse(json.dumps({"status": "OK"}),
+                                content_type='application/json')
+        else:
+            return HttpResponse(json.dumps({"status": "404"}),
+                                content_type='application/json')
 
 @login_required
 def select_chk_or_del(request, tasks_id):
@@ -65,18 +69,15 @@ def select_chk_or_del(request, tasks_id):
             task_list = list(map(int, tasks_id[:-1].split(",")))
         except(KeyError):
             return redirect('index')
-        else:
-            for t in task_list:
-                del_task = Task.objects.get(id=t)
-                if del_task.user.username == request.user.username:
-                    del_task.delete()
-            # [Task.objects.get(id=t).delete() for t in task_list]
-            # for tip in task_list:
-            #    Task.objects.get(id=tip).delete()
-            return HttpResponse(json.dumps({"status": "OK"}),
-                                content_type='application/json')
+        #本来ならCommon.delete_taskを用いたいが、500
+        for t in task_list:
+            del_task = Task.objects.get(id=t)
+            if del_task.user.username == request.user.username:
+                del_task.delete()
+        return HttpResponse(json.dumps({"status": "OK"}),
+                            content_type='application/json')
+
     elif request.method == "GET":
-        print("test")
         try:
             task_id = list(map(int, tasks_id[:-1].split(",")))
             emp = []
@@ -85,27 +86,20 @@ def select_chk_or_del(request, tasks_id):
                 emp.append(task_content)
         except(KeyError, Task.DoesNotExist):
             return redirect('top')
-        else:
-            for tip in emp:
-                if not tip.done:
-                    tip.done = True
-                else:
-                    tip.done = False
-                tip.save()
-            # task_list = Task.objects.filter(user=request.user)
-            # context = {
-            #    'task_list': task_list
-            # }
-            return HttpResponse(json.dumps({"status": "OK"}),
-                                content_type='application/json')
+        for tip in emp:
+            if not tip.done:
+                tip.done = True
+            else:
+                tip.done = False
+            tip.save()
+        return HttpResponse(json.dumps({"status": "OK"}),
+                            content_type='application/json')
 
 
 def make_tab(line):
-    print("test")
     n_line = line.split(' ')
     n_line[1] = n_line[1][:-3]
     new_line = "T".join(n_line)
-    print(new_line)
     return new_line
 
 

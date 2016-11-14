@@ -52,4 +52,9 @@ def api_content(request, task_id):
         else:
             return render_json_response(request, tasks)
     elif request.method == "DELETE":
-        Common.delete_task(request,task_id)
+        if Common.delete_task(request,task_id):
+            return HttpResponse(json.dumps({"status": "OK"}),
+                                content_type='application/json')
+        else:
+            return HttpResponse(json.dumps({"status": "404"}),
+                                content_type='application/json')

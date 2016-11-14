@@ -42,10 +42,8 @@ class Common:
             # 削除する
             if del_task.user.username == request.user.username:
                 del_task.delete()
-            return HttpResponse(json.dumps({"status": "OK"}),
-                                content_type='application/json')
+            return True
         except Task.DoesNotExist:
-            return HttpResponse(json.dumps({"status": "404"}),
-                                content_type='application/json')
+            return False
 
 
