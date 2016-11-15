@@ -71,9 +71,7 @@ def select_chk_or_del(request, tasks_id):
             return redirect('index')
         #本来ならCommon.delete_taskを用いたいが、500
         for t in task_list:
-            del_task = Task.objects.get(id=t)
-            if del_task.user.username == request.user.username:
-                del_task.delete()
+            Common.delete_task(request,t)
         return HttpResponse(json.dumps({"status": "OK"}),
                             content_type='application/json')
 
