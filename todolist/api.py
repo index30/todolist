@@ -3,6 +3,7 @@ import sys
 import re
 import datetime
 import requests
+from bson import json_util
 from collections import OrderedDict
 from django.db import IntegrityError
 from .models import Task
@@ -20,22 +21,23 @@ from django.views.decorators.http import require_GET
 from django.views.generic import View
 
 def render_json_response(request, data, status=None):
-    json_str = json.dumps(data, ensure_ascii=False, indent=2)
+    json_str = json.dumps(data, ensure_ascii=False, indent=2, default=json_util.default)
     callback = request.GET.get('callback')
     if not callback:
         callback = request.POST.get('callback')  # POSTでJSONPの場合
         if callback:
             json_str = "%s(%s)" % (callback, json_str)
-            response = HttpResponse(json_str, content_type='application/javascript; charset=UTF-8', status=status)
+            response = HttpResponse(json_str,
+                                    content_type='application/javascript; charset=UTF-8', status=status)
         else:
-            response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
+            response = HttpResponse(json_str,
+                                    content_type='application/json; charset=UTF-8', status=status)
         return response
 
+    
 def api_content(request, task_id):
     if request.method == "GET":
         tasks = Common.get_task(request,task_id)
-        print(tasks)
-        print(len(tasks))
         if len(tasks) > 0:
             task_info = tasks['task_content']
             task = []
@@ -43,14 +45,15 @@ def api_content(request, task_id):
                 ('id', task_info.id),
                 ('title', task_info.title),
                 ('text', task_info.text),
-                ('done', task_info.done)
-#                ('finished_at', task_info.finished_at)
+                ('done', task_info.done),
+                ('finished_at', task_info.finished_at)
             ])
             task.append(task_dict)
             data = OrderedDict([('tasks', task)])
             return render_json_response(request, data)
         else:
-            return render_json_response(request, tasks)
+            return HttpResponse(json.dumps({"status": "401"}),
+                                content_type='application/json')
     elif request.method == "DELETE":
         if Common.delete_task(request,task_id):
             return HttpResponse(json.dumps({"status": "OK"}),
