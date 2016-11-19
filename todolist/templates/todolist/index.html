@@ -80,7 +80,7 @@ $(function() {
      }).get();
      var check_url = $(this).attr('data-check-url');
      area.map(function (t_id){
-       check_url = check_url + t_id.slice(0,2) + ',';
+       check_url = check_url + t_id.slice(0,-1) + ',';
      });
      
      $.ajax({

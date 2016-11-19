@@ -7,6 +7,7 @@ from collections import OrderedDict
 from django.db import IntegrityError
 from .models import Task
 from .common import Common
+from .forms import CreateForm
 from django.conf import settings
 from dateutil.relativedelta import relativedelta
 from django.http import HttpResponse, Http404, QueryDict
@@ -69,7 +70,6 @@ def select_chk_or_del(request, tasks_id):
             task_list = list(map(int, tasks_id[:-1].split(",")))
         except(KeyError):
             return redirect('index')
-        #本来ならCommon.delete_taskを用いたいが、500
         for t in task_list:
             Common.delete_task(request,t)
         return HttpResponse(json.dumps({"status": "OK"}),
@@ -94,89 +94,35 @@ def select_chk_or_del(request, tasks_id):
                             content_type='application/json')
 
 
-def make_tab(line):
-    n_line = line.split(' ')
-    n_line[1] = n_line[1][:-3]
-    new_line = "T".join(n_line)
-    return new_line
-
-
 @login_required
 def create(request):
     try:
-        new_title = request.POST['title']
-        new_text = request.POST['text']
-        new_done = False
-        new_created_at = datetime.datetime.now()
-        new_updated_at = datetime.datetime.now()
-        tdatatime = request.POST['finish']
-        now_user = request.user
-    except (KeyError, Task.DoesNotExist):
-        return render_to_response('todolist/create.html',
-                                  RequestContext(request, {}))
-    else:
-        pattern = "(20)[0-9]{2}\-[0-9]{1,2}\-[0-9]{1,2}[T](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]"
-        
-        tdata = make_tab(tdatatime)
-        matchOB = re.match(pattern, tdata)
-        if matchOB:
-            new_finished_at = datetime.datetime.strptime(tdata,
-                                                         '%Y-%m-%dT%H:%M')
-            if new_title and new_text:
-                if len(new_title) < 50 and len(new_text) < 1000:
-                    if new_created_at < new_finished_at and new_finished_at < (new_created_at + relativedelta(years=80)):
-                        Task(title=new_title, text=new_text, done=new_done,
-                             created_at=new_created_at, updated_at=new_updated_at,
-                             finished_at=new_finished_at, user=now_user).save()
-                        return redirect('index')
-                    else:
-                        b_error = True
-                        error_mes = "過去のタスクを作成する事は出来ません."
-                        content = {
-                            'message': error_mes,
-                            'b_error': b_error
-                        }
-                        return render_to_response('todolist/create.html',
-                                                  RequestContext(request,
-                                                                 content))
-                elif len(new_title) >= 50:
-                    b_error = True
-                    error_mes = "タイトルが長過ぎます.50文字以内にして下さい"
-                    content = {
-                        'message': error_mes,
-                        'b_error': b_error
-                    }
-                    return render_to_response('todolist/create.html',
-                                              RequestContext(request,
-                                                             content))
-                else:
-                    b_error = True
-                    error_mes = "タスクの内容が長過ぎます.1000文字以内にして下さい"
-                    content = {
-                        'message': error_mes,
-                        'b_error': b_error
-                    }
-                    return render_to_response('todolist/create.html',
-                                              RequestContext(request,
-                                                             content))
+        if request.method == 'POST':
+            form = CreateForm(request.POST)
+            if form.is_valid():
+                new_title = form.cleaned_data['title']
+                new_text = form.cleaned_data['text']
+                new_finished_at = form.cleaned_data['finish_at']
+                new_done = False
+                new_created_at = datetime.datetime.now()
+                new_updated_at = datetime.datetime.now()
+                now_user = request.user
+                Task(title=new_title, text=new_text, done=new_done,
+                     created_at=new_created_at, updated_at=new_updated_at,
+                     finished_at=new_finished_at, user=now_user).save()
+                return redirect('index')
             else:
-                b_error = True
-                error_mes = "タイトルかタスクの内容が空欄です."
-                content = {
-                    'message': error_mes,
-                    'b_error': b_error
-                }
+                form = CreateForm()
                 return render_to_response('todolist/create.html',
-                                          RequestContext(request, content))
+                                          RequestContext(request, {'form':form}))
         else:
-            b_error = True
-            error_mes = "Deadlineの入力形式が異なっています."
-            content = {
-                'message': error_mes,
-                'b_error': b_error
-            }
+            form = CreateForm()
             return render_to_response('todolist/create.html',
-                                      RequestContext(request, content))
+                                      RequestContext(request, {'form':form}))
+    except (KeyError, Task.DoesNotExist):
+        form = CreateForm()
+        return render_to_response('todolist/create.html',
+                                  RequestContext(request, {'form':form}))
 
 
 def auth_captcha(request):

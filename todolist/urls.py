@@ -18,5 +18,5 @@ urlpatterns = [
         'document_root': settings.STATIC_ROOT,
     }
     ),
-    url(r'^api/task/(?P<task_id>\d+)/$', api.api_content, name='api_content')
+    url(r'^api/task/(?P<task_id>\d+)/$', api.api_content, name='api_content'),
 ]

@@ -20,10 +20,11 @@
 
 <form class="form-horizontal" role="form" action="{% url 'create' %}" method = "post">
   {% csrf_token %}
+  {{form.non_field_errors}}
   <div class="form-group">
     <label class="col-sm-2 control-label">Title</label>
     <div class="col-sm-9">
-      <input type="text" name="title" class="form-control" placeholder="title">
+      {{form.title}}
     </div>
     
   </div>
@@ -31,14 +32,15 @@
   <div class="form-group">
     <label class="col-sm-2 control-label">Content</label>
     <div class="col-sm-9">
-      <textarea class="form-control" name="text" placeholder="input content of task" rows="10" placeholder="detail of task"></textarea>
+      {{form.text}}
     </div>
   </div>
 
   <div class="form-group">
+    {{form.finish_at.errors}}
     <label class="col-sm-2 control-label">Deadline</label>
     <div class="col-sm-8">
-      <input type="text" name="finish" class="form-control date" />
+      {{form.finish_at}}
     </div>
     <div class="col-sm-1">
       <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
