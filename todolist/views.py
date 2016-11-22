@@ -94,13 +94,6 @@ def select_chk_or_del(request, tasks_id):
                             content_type='application/json')
 
 
-def make_tab(line):
-    n_line = line.split(' ')
-    n_line[1] = n_line[1][:-3]
-    new_line = "T".join(n_line)
-    return new_line
-
-
 @login_required
 def create(request):
     content = {'message': "", 'b_error': True}
