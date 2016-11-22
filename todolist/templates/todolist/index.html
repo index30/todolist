@@ -9,11 +9,9 @@
 {% block nav_index %}active{% endblock %}
 
 {% block content %}
-{% if task_list %}
+{% if nowuser_task_list %}
 <ul class="list-group">
-  {% for task in task_list %}
-  
-  
+  {% for task in nowuser_task_list %}
   
   {% if task.done %}
  <input type="checkbox" class="del-id" chk-url="/task/" value={{task.id}}/>
@@ -80,7 +78,7 @@ $(function() {
      }).get();
      var check_url = $(this).attr('data-check-url');
      area.map(function (t_id){
-       check_url = check_url + t_id.slice(0,2) + ',';
+       check_url = check_url + t_id.slice(0,-1) + ',';
      });
      
      $.ajax({

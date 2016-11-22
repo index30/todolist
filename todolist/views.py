@@ -22,36 +22,36 @@ from django.views.generic import View
 
 def top(request):
     if request.user.is_authenticated():
-        task_list = Task.objects.filter(user=request.user, done=False)
-        context = {
-            'task_list': task_list,
-            'number': task_list.count()
+        #クエリ文を無闇に生成しないために,filter関数をそのままtask_existとして扱う
+        task_exist = Task.objects.filter(user=request.user, done=False)
+        toppage_context = {
+            'task_exist': task_exist,
+            'nowuser_task_total': task_exist.count()
         }
     else:
-        context = {
+        toppage_context = {
             'error_mes': "ログイン/ユーザー登録して下さい"
         }
     return render_to_response('todolist/top.html', RequestContext(request,
-                                                                  context))
+                                                                toppage_context))
 
 
 @login_required
 def index(request):
-    task_list = Task.objects.filter(user=request.user)
-    context = {
-        'task_list': task_list
+    nowuser_task_list_context = {
+        'nowuser_task_list': Task.objects.filter(user=request.user)
     }
     return render_to_response('todolist/index.html',
-                              RequestContext(request, context))
+                              RequestContext(request, nowuser_task_list_context))
 
 
 @login_required
 def task_content(request, task_id):
     if request.method == "GET":
-        task_info = Common.get_task(request,task_id)
-        if len(task_info) > 0:
+        task = Common.get_task(request,task_id)
+        if len(task) > 0:
             return render_to_response('todolist/task.html',
-                                      RequestContext(request, task_info))
+                                      RequestContext(request, task))
         else:
             return redirect('top')
     elif request.method == "DELETE":
@@ -64,32 +64,29 @@ def task_content(request, task_id):
 
 @login_required
 def select_chk_or_del(request, tasks_id):
+    try:
+        task_id_list = list(map(int, tasks_id[:-1].split(",")))
+    except(KeyError):
+        return redirect('index')
     if request.method == "DELETE":
-        try:
-            task_list = list(map(int, tasks_id[:-1].split(",")))
-        except(KeyError):
-            return redirect('index')
-        #本来ならCommon.delete_taskを用いたいが、500
-        for t in task_list:
+        for t in task_id_list:
             Common.delete_task(request,t)
         return HttpResponse(json.dumps({"status": "OK"}),
                             content_type='application/json')
-
     elif request.method == "GET":
         try:
-            task_id = list(map(int, tasks_id[:-1].split(",")))
-            emp = []
-            for task_num in task_id:
-                task_content = Task.objects.get(id=task_num)
-                emp.append(task_content)
+            tasks = []
+            for task_id in task_id_list:
+                task_content = Task.objects.get(id=task_id)
+                tasks.append(task_content)
         except(KeyError, Task.DoesNotExist):
             return redirect('top')
-        for tip in emp:
-            if not tip.done:
-                tip.done = True
+        for task in tasks:
+            if task.done:
+                task.done = False
             else:
-                tip.done = False
-            tip.save()
+                task.done = True
+            task.save()
         return HttpResponse(json.dumps({"status": "OK"}),
                             content_type='application/json')
 
@@ -138,8 +135,7 @@ def create(request):
 
 
 def auth_captcha(request):
-
-        # 開発環境などではFalseにしておく
+    # 開発環境などではFalseにしておく
     if not settings.CAPTCHA:
         return True
 
