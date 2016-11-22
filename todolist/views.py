@@ -1,7 +1,7 @@
 import json
 import sys
 import re
-import datetime
+from datetime import datetime
 import requests
 from collections import OrderedDict
 from django.db import IntegrityError
@@ -103,80 +103,45 @@ def make_tab(line):
 
 @login_required
 def create(request):
+    content = {'message': "", 'b_error': True}
+    response = lambda content: render_to_response('todolist/create.html',
+                                                  RequestContext(request, content))
+    if request.method == "GET":
+        return response({})
+
+    new_title = request.POST.get('title')
+    new_text = request.POST.get('text')
+    new_done = False
+    new_created_at = datetime.now()
+    new_updated_at = datetime.now()
+    tdatetime = request.POST.get('finish')
+    now_user = request.user
+
     try:
-        new_title = request.POST['title']
-        new_text = request.POST['text']
-        new_done = False
-        new_created_at = datetime.datetime.now()
-        new_updated_at = datetime.datetime.now()
-        tdatatime = request.POST['finish']
-        now_user = request.user
-    except (KeyError, Task.DoesNotExist):
-        return render_to_response('todolist/create.html',
-                                  RequestContext(request, {}))
-    else:
-        pattern = "(20)[0-9]{2}\-[0-9]{1,2}\-[0-9]{1,2}[T](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]"
-        
-        tdata = make_tab(tdatatime)
-        matchOB = re.match(pattern, tdata)
-        if matchOB:
-            new_finished_at = datetime.datetime.strptime(tdata,
-                                                         '%Y-%m-%dT%H:%M')
-            if new_title and new_text:
-                if len(new_title) < 50 and len(new_text) < 1000:
-                    if new_created_at < new_finished_at and new_finished_at < (new_created_at + relativedelta(years=80)):
-                        Task(title=new_title, text=new_text, done=new_done,
-                             created_at=new_created_at, updated_at=new_updated_at,
-                             finished_at=new_finished_at, user=now_user).save()
-                        return redirect('index')
-                    else:
-                        b_error = True
-                        error_mes = "過去のタスクを作成する事は出来ません."
-                        content = {
-                            'message': error_mes,
-                            'b_error': b_error
-                        }
-                        return render_to_response('todolist/create.html',
-                                                  RequestContext(request,
-                                                                 content))
-                elif len(new_title) >= 50:
-                    b_error = True
-                    error_mes = "タイトルが長過ぎます.50文字以内にして下さい"
-                    content = {
-                        'message': error_mes,
-                        'b_error': b_error
-                    }
-                    return render_to_response('todolist/create.html',
-                                              RequestContext(request,
-                                                             content))
-                else:
-                    b_error = True
-                    error_mes = "タスクの内容が長過ぎます.1000文字以内にして下さい"
-                    content = {
-                        'message': error_mes,
-                        'b_error': b_error
-                    }
-                    return render_to_response('todolist/create.html',
-                                              RequestContext(request,
-                                                             content))
-            else:
-                b_error = True
-                error_mes = "タイトルかタスクの内容が空欄です."
-                content = {
-                    'message': error_mes,
-                    'b_error': b_error
-                }
-                return render_to_response('todolist/create.html',
-                                          RequestContext(request, content))
-        else:
-            b_error = True
-            error_mes = "Deadlineの入力形式が異なっています."
-            content = {
-                'message': error_mes,
-                'b_error': b_error
-            }
-            return render_to_response('todolist/create.html',
-                                      RequestContext(request, content))
+        new_finished_at = datetime.strptime(tdatetime, '%Y-%m-%d %H:%M:%S')
+
+        if not new_title or not new_text:
+            content.update({'message': "タイトルかタスクの内容が空欄です."})
+            return response(content)
+
+        if len(new_title) > 50 or len(new_text) > 1000:
+            message = "タイトルが長すぎます.50文字以内にして下さい" if len(new_title) > 50 else \
+                      "タスクの内容が長過ぎます.1000文字以内にして下さい"
+            content.update({'message': message})
+            return response(content)
+
+        if new_created_at >= new_finished_at or \
+           new_finished_at > (new_created_at + relativedelta(years=80)):
+            content.update({'message': "過去のタスクを作成する事は出来ません."})
+            return response(content)
+
+        Task(title=new_title, text=new_text, done=new_done,
+             created_at=new_created_at, updated_at=new_updated_at,
+             finished_at=new_finished_at, user=now_user).save()
+        return redirect('index')
+    except ValueError:
+        content.update({'message': "Deadlineの入力形式が異なっています."})
+        return response(content)
 
 
 def auth_captcha(request):
@@ -279,4 +244,4 @@ def render_json_response(request, data, status=None):
         else:
             response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
         return response
-        
+    
