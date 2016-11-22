@@ -95,7 +95,8 @@ def select_chk_or_del(request, tasks_id):
 def create(request):
     content = {'message': "", 'b_error': True}
     response = lambda content: render_to_response('todolist/create.html',
-                                                  RequestContext(request, content))
+                                                  RequestContext(request,
+                                                                 content))
     if request.method == "GET":
         return response({})
 
@@ -154,72 +155,47 @@ def auth_captcha(request):
 
 
 def register(request):
-    if not request.user.is_authenticated():
-        try:
-            new_name = request.POST['user_name']
-            new_email = request.POST['email']
-            new_pass = request.POST['password']
-            conf_pass = request.POST['confirm']
-        except (KeyError, User.DoesNotExist):
-            return render_to_response('todolist/make_user.html',
-                                      RequestContext(request, {}))
-        else:
-            if auth_captcha(request):
-                if new_pass == conf_pass:
-                    user = authenticate(username=new_name, password=new_pass)
-                    if user is None:
-                        try:
-                            User.objects.create_user(new_name,
-                                                     new_email,
-                                                     new_pass).save()
-                        except(IntegrityError):
-                            b_error = True
-                            error_mes = "appleなど,単純な名前は避けて下さい"
-                            content = {
-                                'message': error_mes,
-                                'b_error': b_error
-                            }
-                            return render_to_response(
-                                'todolist/make_user.html',
-                                RequestContext(request, content))
-                        else:
-                            return redirect('signin')
-                    else:
-                        b_error = True
-                        error_mes = "そのユーザーは既に存在します"
-                        content = {
-                            'message': error_mes,
-                            'b_error': b_error
-                        }
-                        return render_to_response('todolist/make_user.html',
+    if request.user.is_authenticated():
+        return redirect('signin')
+    content = {'message': "", 'b_error': True}
+    response = lambda content: render_to_response('todolist/make_user.html',
                                                   RequestContext(request,
                                                                  content))
-                else:
-                    b_error = True
-                    error_mes = "パスワードが異なっています"
-                    content = {
-                        'message': error_mes,
-                        'b_error': b_error
-                    }
-                    return render_to_response('todolist/make_user.html',
-                                              RequestContext(request, content))
-            else:
-                b_error = True
-                error_mes = "チェックを入れて下さい"
-                content = {
-                    'message': error_mes,
-                    'b_error': b_error
-                }
-                return render_to_response('todolist/make_user.html',
-                                          RequestContext(request, content))
-    else:
-        return redirect('signin')
+    if request.method == "GET":
+        return response({})
+
+    new_name = request.POST.get('user_name')
+    new_email = request.POST.get('email')
+    new_pass = request.POST.get('password')
+    conf_pass = request.POST.get('confirm')
+    user = authenticate(username=new_name, password=new_pass)
+    if not new_name or not new_email or not new_pass or not conf_pass:
+        content.update({'message': "未記入の箇所が存在しました"})
+        return response(content)
+    if not auth_captcha(request):
+        content.update({'message': "チェックを入れて下さい"})
+        return response(content)
+    if new_pass != conf_pass:
+        content.update({'message': "パスワードが異なっています"})
+        return response(content)
+    if user is not None:
+        content.update({'message': "そのユーザーは既に存在します"})
+        return response(content)                    
+    try:
+        User.objects.create_user(new_name,
+                                 new_email,
+                                 new_pass).save()
+    except(IntegrityError):
+        content.update({'message': "appleなど,単純な名前は避けて下さい"})
+        return response(content)
+    return redirect('signin')
 
 
 @login_required
 def signout(request):
     logout(request)
     return redirect('top')
+
 
 def render_json_response(request, data, status=None):
     """response を JSON で返却"""
@@ -229,8 +205,12 @@ def render_json_response(request, data, status=None):
         callback = request.POST.get('callback')  # POSTでJSONPの場合
         if callback:
             json_str = "%s(%s)" % (callback, json_str)
-            response = HttpResponse(json_str, content_type='application/javascript; charset=UTF-8', status=status)
+            response = HttpResponse(json_str,
+                                    content_type='application/javascript; charset=UTF-8',
+                                    status=status)
         else:
-            response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
+            response = HttpResponse(json_str,
+                                    content_type='application/json; charset=UTF-8',
+                                    status=status)
         return response
     

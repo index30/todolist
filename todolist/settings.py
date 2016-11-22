@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
-CAPTCHA = True
+CAPTCHA = False
 CAPTCHA_SECRETKEY = "6LfnlSYTAAAAAJrt34DNqu-XCUoTPli4ADyA-R7a"
 
 # SECURITY WARNING: keep the secret key used in production secret!
