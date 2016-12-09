@@ -8,8 +8,8 @@
 
 {% block content %}
 
-{% if task_list %}
-  <h3 class="text-center">現在 <span class="text-danger">{{number}}</span> 個のタスクが残っています</h3>
+{% if task_exist %}
+  <h3 class="text-center">現在 <span class="text-danger">{{nowuser_task_total}}</span> 個のタスクが残っています</h3>
 {% else %}
 {% if error_mes %}
 <div class="alert alert-danger" role="alert">
