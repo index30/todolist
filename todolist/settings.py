@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import socket
+from .test import Test
 HOST_NAME = socket.gethostname()
 URL_ROOT = HOST_NAME
 
@@ -23,10 +24,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 CAPTCHA = True
-CAPTCHA_SECRETKEY = "6LfnlSYTAAAAAJrt34DNqu-XCUoTPli4ADyA-R7a"
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'f^79x=l!sjvcus%9j)*nfrwb)p=8rj8(ax_x%+ilgyj*#9lp+d'
+
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -35,9 +36,13 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 if 'local' in HOST_NAME:
     DEBUG = True
+    CAPTCHA_SECRETKEY = Test.captcha_secret
+    SECRET_KEY = Test.secret
     #TEMPLATE_DEBUG = True
 else:
     DEBUG = False
+    CAPTCHA_SECRETKEY = os.environ.get('capsec')
+    SECRET_KEY = os.environ.get('sec')
     #TEMPLATE_DEBUG = False
     ALLOWED_HOSTS = ['*']
 
